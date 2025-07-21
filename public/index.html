@@ -643,17 +643,16 @@
         </div>
     </div>
     <script>
-        const API_BASE = 'http://localhost:3010';
+        // Dynamic API base URL that adapts to current host and port
+        const API_BASE = `${window.location.protocol}//${window.location.host}`;
         let currentEditingBot = null;
-
+        
         async function fetchAPI(endpoint) {
-            try {
-                const response = await fetch(`${API_BASE}${endpoint}`);
-                return await response.json();
-            } catch (error) {
-                console.error('API Error:', error);
-                throw error;
+            const response = await fetch(`${API_BASE}${endpoint}`);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
             }
+            return await response.json();
         }
 
         async function updateStatus() {
@@ -855,15 +854,22 @@
             if (!confirm('Sei sicuro di voler eliminare questo bot?')) return;
             
             try {
+                console.log(`Tentativo di eliminazione bot con ID: ${botId}`);
+                console.log(`URL chiamata: ${API_BASE}/bots/${botId}`);
                 const response = await fetch(`${API_BASE}/bots/${botId}`, { method: 'DELETE' });
                 const data = await response.json();
+                console.log('Risposta server:', data);
+                
                 if (!response.ok || data.success === false) {
+                    console.error('Errore eliminazione:', data);
                     alert(data.message || 'Errore nell\'eliminazione del bot');
                     return;
                 }
+                alert('Bot eliminato con successo!');
                 await refreshData();
             } catch (error) {
-                alert('Errore nell\'eliminazione del bot');
+                console.error('Errore eliminazione bot:', error);
+                alert('Errore nell\'eliminazione del bot: ' + error.message);
             }
         }
 
@@ -871,15 +877,27 @@
             e.preventDefault();
             
             const formData = {
-                id: document.getElementById('botId').value,
-                name: document.getElementById('botName').value,
+                id: document.getElementById('botId').value.trim(), // Trim spaces from ID
+                name: document.getElementById('botName').value.trim(),
                 credentials: {
-                    username: document.getElementById('username').value,
+                    username: document.getElementById('username').value.trim(),
                     password: document.getElementById('password').value
                 },
                 hashtags: document.getElementById('hashtags').value.split('\n').filter(tag => tag.trim()),
                 enabled: document.getElementById('enabled').checked
             };
+
+            // Validate required fields
+            if (!formData.id || !formData.name || !formData.credentials.username || !formData.credentials.password) {
+                alert('Tutti i campi sono obbligatori');
+                return;
+            }
+
+            // Validate ID format (no spaces, alphanumeric + underscore)
+            if (!/^[a-zA-Z0-9_]+$/.test(formData.id)) {
+                alert('L\'ID bot può contenere solo lettere, numeri e underscore (senza spazi)');
+                return;
+            }
 
             try {
                 let response, data;

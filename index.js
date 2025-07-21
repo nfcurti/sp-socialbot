@@ -275,19 +275,27 @@ app.patch('/bots/:id/enabled', (req, res) => {
 // Delete a bot
 app.delete('/bots/:id', (req, res) => {
     const config = loadConfig();
-    const botIndex = config.bots.findIndex(b => b.id === req.params.id);
+    const requestedId = req.params.id;
+    console.log(`🗑️ Tentativo eliminazione bot - ID richiesto: "${requestedId}"`);
+    console.log(`📋 Bot disponibili:`, config.bots.map(b => `"${b.id}"`));
+    
+    const botIndex = config.bots.findIndex(b => b.id === requestedId);
     if (botIndex === -1) {
-        return res.status(404).json({ success: false, message: 'Bot not found' });
+        console.log(`❌ Bot non trovato - ID cercato: "${requestedId}"`);
+        return res.status(404).json({ success: false, message: 'Bot non trovato' });
     }
+    
     const bot = config.bots[botIndex];
+    console.log(`✅ Bot trovato: "${bot.id}" - Nome: ${bot.name}`);
     config.bots.splice(botIndex, 1);
     saveConfig(config);
+    
     // If no bots left, stop the scheduler
     if (config.bots.length === 0) {
         scheduler.stopScheduler();
         actions.setSchedulerStatus(false);
     }
-    actions.addLog('bot_deleted', true, `Bot deleted: ${bot.name} (${bot.id})`, bot.id);
+    actions.addLog('bot_deleted', true, `Bot eliminato: ${bot.name} (${bot.id})`, bot.id);
     res.json({ success: true, bots: config.bots });
 });
 

@@ -1,8 +1,8 @@
 {
   "bots": [
     {
-      "id": "bot",
-      "name": "rest1",
+      "id": "bot1",
+      "name": "risto",
       "credentials": {
         "username": "nicoocurti",
         "password": "862554zZ"
@@ -10,7 +10,7 @@
       "hashtags": [
         "pizza"
       ],
-      "enabled": true
+      "enabled": false
     }
   ],
   "scheduler": {
