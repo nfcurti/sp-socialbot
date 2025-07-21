@@ -1,0 +1,23 @@
+{
+  "bots": [
+    {
+      "id": "bot1",
+      "name": "Restaurant Bot 1",
+      "credentials": {
+        "username": "testristo448@gmail.com",
+        "password": "simonetest1"
+      },
+      "hashtags": [
+        "food", "cooking", "pasta", "pizza", "restaurant", 
+        "chef", "cuisine", "gastronomy", "dining", "culinary",
+        "italy", "toscana", "homecooking", "delicious"
+      ],
+      "enabled": true
+    }
+  ],
+  "scheduler": {
+    "interval": "*/30 * * * *",
+    "maxLogs": 100,
+    "scriptTimeout": 300000
+  }
+} 

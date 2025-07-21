@@ -1,0 +1,21 @@
+{
+  "bots": [
+    {
+      "id": "bot",
+      "name": "rest1",
+      "credentials": {
+        "username": "nicoocurti",
+        "password": "862554zZ"
+      },
+      "hashtags": [
+        "pizza"
+      ],
+      "enabled": true
+    }
+  ],
+  "scheduler": {
+    "interval": "*/30 * * * *",
+    "maxLogs": 100,
+    "scriptTimeout": 300000
+  }
+}
