@@ -605,10 +605,11 @@ function restoreScheduledJobs() {
     }
 }
 
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
     console.log(`🤖 Instagram AI Scheduler running on port ${PORT}`);
-    console.log(`🌐 Web interface available at http://localhost:${PORT}`);
-    console.log(`📊 API available at http://localhost:${PORT}/api`);
+    console.log(`🌐 Web interface available at http://0.0.0.0:${PORT}`);
+    console.log(`🌍 External access: http://34.252.34.118:${PORT}`);
+    console.log(`📊 API available at http://0.0.0.0:${PORT}/api`);
     console.log(`📅 Scheduler will run scripts with random intervals (5-15 minutes) when started`);
     console.log(`🤖 Multiple bot instances supported`);
     console.log(`📘 Facebook post scheduling available`);
