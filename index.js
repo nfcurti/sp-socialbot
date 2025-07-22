@@ -231,9 +231,15 @@ app.post('/bots', (req, res) => {
     if (config.bots.find(b => b.id === bot.id)) {
         return res.status(400).json({ success: false, message: 'Bot ID already exists' });
     }
+    
+    // Ensure location field exists (can be empty string)
+    if (!bot.location) {
+        bot.location = '';
+    }
+    
     config.bots.push(bot);
     saveConfig(config);
-    actions.addLog('bot_created', true, `Bot created: ${bot.name} (${bot.id})`, bot.id);
+    actions.addLog('bot_created', true, `Bot created: ${bot.name} (${bot.id})${bot.location ? ` - ${bot.location}` : ''}`, bot.id);
     res.json({ success: true, bots: config.bots });
 });
 
@@ -248,10 +254,16 @@ app.put('/bots/:id', (req, res) => {
     if (!bot.id || !bot.name || !bot.credentials || !bot.credentials.username || !bot.credentials.password || !Array.isArray(bot.hashtags)) {
         return res.status(400).json({ success: false, message: 'Missing required bot fields' });
     }
+    
+    // Ensure location field exists (can be empty string)
+    if (!bot.location) {
+        bot.location = '';
+    }
+    
     bot.enabled = false; // Always stop after edit
     config.bots[botIndex] = bot;
     saveConfig(config);
-    actions.addLog('bot_edited', true, `Bot edited: ${bot.name} (${bot.id})`, bot.id);
+    actions.addLog('bot_edited', true, `Bot edited: ${bot.name} (${bot.id})${bot.location ? ` - ${bot.location}` : ''}`, bot.id);
     res.json({ success: true, bots: config.bots });
 });
 
