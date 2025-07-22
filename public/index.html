@@ -632,7 +632,7 @@
                 </div>
                 <div class="form-group">
                     <label>
-                        <input type="checkbox" id="enabled" checked> Abilitato
+                        <input type="checkbox" id="enabled"> Abilitato (sarà fermo all'inizio)
                     </label>
                 </div>
                 <div style="display: flex; gap: 10px; justify-content: flex-end;">
@@ -825,6 +825,7 @@
             currentEditingBot = null;
             document.getElementById('modalTitle').textContent = 'Aggiungi Nuovo Bot';
             document.getElementById('botForm').reset();
+            document.getElementById('enabled').checked = false; // Ensure new bots start disabled
             document.getElementById('botModal').style.display = 'block';
         }
 
