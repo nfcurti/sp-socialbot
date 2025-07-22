@@ -239,7 +239,7 @@ app.post('/bots', (req, res) => {
     
     config.bots.push(bot);
     saveConfig(config);
-    actions.addLog('bot_created', true, `Bot created: ${bot.name} (${bot.id})${bot.location ? ` - ${bot.location}` : ''}`, bot.id);
+    actions.addLog('bot_created', true, `Bot created: ${bot.name} (${bot.id})${bot.location ? ` - Location Tag: ${bot.location}` : ''}`, bot.id);
     res.json({ success: true, bots: config.bots });
 });
 
@@ -263,7 +263,7 @@ app.put('/bots/:id', (req, res) => {
     bot.enabled = false; // Always stop after edit
     config.bots[botIndex] = bot;
     saveConfig(config);
-    actions.addLog('bot_edited', true, `Bot edited: ${bot.name} (${bot.id})${bot.location ? ` - ${bot.location}` : ''}`, bot.id);
+    actions.addLog('bot_edited', true, `Bot edited: ${bot.name} (${bot.id})${bot.location ? ` - Location Tag: ${bot.location}` : ''}`, bot.id);
     res.json({ success: true, bots: config.bots });
 });
 

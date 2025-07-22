@@ -907,13 +907,13 @@
     <div id="botModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3 id="modalTitle">🤖 Aggiungi Nuovo Bot</h3>
+                <h3 id="modalTitle">Aggiungi Nuovo Bot</h3>
                 <span class="close" onclick="closeModal()">&times;</span>
             </div>
             <form id="botForm">
                 <div class="form-group">
                     <label for="botName">
-                        <span class="label-icon">📝</span>
+                        <span class="label-icon"></span>
                         Nome Bot:
                     </label>
                     <input type="text" id="botName" required placeholder="es. Bot Ristorante Milano Centro">
@@ -922,8 +922,8 @@
                 
                 <div class="form-group">
                     <label for="location">
-                        <span class="label-icon">📍</span>
-                        Località:
+                        <span class="label-icon"></span>
+                        Location Tag:
                     </label>
                     <input type="text" id="location" required placeholder="es. Milano, Roma, Napoli">
                     <small class="form-hint">Indica la città o zona geografica del tuo business</small>
@@ -932,7 +932,7 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label for="username">
-                            <span class="label-icon">👤</span>
+                            <span class="label-icon"></span>
                             Username Instagram:
                         </label>
                         <input type="text" id="username" required placeholder="es. il_mio_ristorante">
@@ -940,7 +940,7 @@
                     </div>
                     <div class="form-group">
                         <label for="password">
-                            <span class="label-icon">🔒</span>
+                            <span class="label-icon"></span>
                             Password:
                         </label>
                         <input type="password" id="password" required placeholder="••••••••">
@@ -950,7 +950,7 @@
                 
                 <div class="form-group">
                     <label for="hashtags">
-                        <span class="label-icon">#️⃣</span>
+                        <span class="label-icon"></span>
                         Hashtags (uno per riga):
                     </label>
                     <textarea id="hashtags" required placeholder="pizza&#10;pasta&#10;ristorante&#10;cucinaitaliana&#10;food&#10;milano"></textarea>
@@ -970,10 +970,10 @@
                 
                 <div class="modal-actions">
                     <button type="button" class="btn btn-secondary" onclick="closeModal()">
-                        <span>❌</span> Annulla
+                        <span></span> Annulla
                     </button>
                     <button type="submit" class="btn btn-success">
-                        <span>💾</span> Salva Bot
+                        <span></span> Salva Bot
                     </button>
                 </div>
             </form>
@@ -1002,12 +1002,12 @@
                 if (status.schedulerRunning) {
                     indicator.className = 'status-indicator status-running';
                     statusText.textContent = 'Scheduler is running';
-                    toggleBtn.textContent = '⏹️ Stop Scheduler';
+                    toggleBtn.textContent = 'Stop Scheduler';
                     toggleBtn.className = 'btn btn-danger';
                 } else {
                     indicator.className = 'status-indicator status-stopped';
                     statusText.textContent = 'Scheduler is stopped';
-                    toggleBtn.textContent = '▶️ Start Scheduler';
+                    toggleBtn.textContent = 'Start Scheduler';
                     toggleBtn.className = 'btn btn-success';
                 }
             } catch (error) {
@@ -1039,18 +1039,18 @@
                             </span>
                         </div>
                         <div class="bot-info">
-                            <p><strong>👤 Username:</strong> ${bot.credentials.username}</p>
-                            ${bot.location ? `<p><strong>📍 Località:</strong> ${bot.location}</p>` : ''}
-                            <p><strong>#️⃣ Hashtag:</strong></p>
+                            <p><strong>Username:</strong> ${bot.credentials.username}</p>
+                            ${bot.location ? `<p><strong>Location Tag:</strong> ${bot.location}</p>` : ''}
+                            <p><strong>Hashtag:</strong></p>
                             <div class="hashtags">
                                 ${bot.hashtags.map(tag => `<span class="hashtag">#${tag}</span>`).join('')}
                             </div>
                         </div>
                         <div class="bot-actions">
-                            <button class="btn btn-success" onclick="startBot('${bot.id}')" ${bot.enabled ? 'disabled' : ''}>▶️ Avvia</button>
-                            <button class="btn btn-secondary" onclick="stopBot('${bot.id}')" ${!bot.enabled ? 'disabled' : ''}>⏹️ Ferma</button>
-                            <button class="btn btn-warning" onclick="editBot('${bot.id}')">✏️ Modifica</button>
-                            <button class="btn btn-danger" onclick="deleteBot('${bot.id}')">🗑️ Elimina</button>
+                            <button class="btn btn-success" onclick="startBot('${bot.id}')" ${bot.enabled ? 'disabled' : ''}>Avvia</button>
+                            <button class="btn btn-secondary" onclick="stopBot('${bot.id}')" ${!bot.enabled ? 'disabled' : ''}>Ferma</button>
+                            <button class="btn btn-warning" onclick="editBot('${bot.id}')">Modifica</button>
+                            <button class="btn btn-danger" onclick="deleteBot('${bot.id}')">Elimina</button>
                         </div>
                     </div>
                 `).join('') + `
@@ -1160,7 +1160,7 @@
 
         function openAddBotModal() {
             currentEditingBot = null;
-            document.getElementById('modalTitle').textContent = '🤖 Aggiungi Nuovo Bot';
+            document.getElementById('modalTitle').textContent = 'Aggiungi Nuovo Bot';
             document.getElementById('botForm').reset();
             document.getElementById('enabled').checked = false; // Ensure new bots start disabled
             document.getElementById('botModal').style.display = 'block';
@@ -1175,7 +1175,7 @@
             try {
                 const bot = await fetchAPI(`/bots/${botId}`);
                 currentEditingBot = bot.bot;
-                document.getElementById('modalTitle').textContent = '🤖 Modifica Bot';
+                document.getElementById('modalTitle').textContent = 'Modifica Bot';
                 document.getElementById('botName').value = bot.bot.name;
                 document.getElementById('location').value = bot.bot.location || '';
                 document.getElementById('username').value = bot.bot.credentials.username;
@@ -1376,7 +1376,7 @@
                                 <span class="post-status status-${post.status}">${post.status.charAt(0).toUpperCase() + post.status.slice(1)}</span>
                             </div>
                             <div class="post-text">${post.text.length > 100 ? post.text.substring(0, 100) + '...' : post.text}</div>
-                            ${post.imagePath ? `<div style="font-size: 0.8em; color: var(--gray);">📷 Image: ${post.imagePath}</div>` : ''}
+                            ${post.imagePath ? `<div style="font-size: 0.8em; color: var(--gray);">Image: ${post.imagePath}</div>` : ''}
                             <div class="post-actions">
                                 ${post.status === 'scheduled' ? `
                                     <button class="btn btn-danger btn-small" onclick="cancelFacebookPost('${post.id}')">Annulla</button>
