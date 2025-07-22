@@ -163,7 +163,14 @@
             width: 100%;
             height: 100%;
             background-color: rgba(0,0,0,0.18);
+            overflow-y: auto;
         }
+        
+        /* Prevent body scroll when modal is open */
+        body.modal-open {
+            overflow: hidden;
+        }
+        
         .modal-content {
             background-color: #fff;
             margin: 3% auto;
@@ -175,6 +182,9 @@
             overflow: hidden;
             transform: scale(0.9);
             animation: modalOpen 0.3s ease forwards;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
         }
         
         @keyframes modalOpen {
@@ -192,6 +202,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            flex-shrink: 0;
         }
         
         .modal-header h3 {
@@ -213,6 +224,8 @@
         
         #botForm {
             padding: 32px;
+            overflow-y: auto;
+            flex: 1;
         }
         
         .form-row {
@@ -240,11 +253,6 @@
             font-weight: 600;
             color: var(--primary);
             font-size: 0.95em;
-        }
-        
-        .label-icon {
-            margin-right: 8px;
-            font-size: 1.1em;
         }
         
         .form-hint {
@@ -335,10 +343,6 @@
             gap: 8px;
             min-width: 120px;
             justify-content: center;
-        }
-        
-        .modal-actions .btn span {
-            font-size: 1.1em;
         }
         .logs-section {
             background: var(--secondary);
@@ -610,11 +614,6 @@
             font-size: 0.95em;
         }
         
-        .label-icon {
-            margin-right: 8px;
-            font-size: 1.1em;
-        }
-        
         .form-hint {
             display: block;
             margin-top: 6px;
@@ -703,10 +702,6 @@
             gap: 8px;
             min-width: 120px;
             justify-content: center;
-        }
-        
-        .modal-actions .btn span {
-            font-size: 1.1em;
         }
         /* Facebook Scheduler Styles */
         .facebook-scheduler {
@@ -913,7 +908,6 @@
             <form id="botForm">
                 <div class="form-group">
                     <label for="botName">
-                        <span class="label-icon"></span>
                         Nome Bot:
                     </label>
                     <input type="text" id="botName" required placeholder="es. Bot Ristorante Milano Centro">
@@ -922,7 +916,6 @@
                 
                 <div class="form-group">
                     <label for="location">
-                        <span class="label-icon"></span>
                         Location Tag:
                     </label>
                     <input type="text" id="location" required placeholder="es. Milano, Roma, Napoli">
@@ -932,7 +925,6 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label for="username">
-                            <span class="label-icon"></span>
                             Username Instagram:
                         </label>
                         <input type="text" id="username" required placeholder="es. il_mio_ristorante">
@@ -940,7 +932,6 @@
                     </div>
                     <div class="form-group">
                         <label for="password">
-                            <span class="label-icon"></span>
                             Password:
                         </label>
                         <input type="password" id="password" required placeholder="••••••••">
@@ -950,7 +941,6 @@
                 
                 <div class="form-group">
                     <label for="hashtags">
-                        <span class="label-icon"></span>
                         Hashtags (uno per riga):
                     </label>
                     <textarea id="hashtags" required placeholder="pizza&#10;pasta&#10;ristorante&#10;cucinaitaliana&#10;food&#10;milano"></textarea>
@@ -970,10 +960,10 @@
                 
                 <div class="modal-actions">
                     <button type="button" class="btn btn-secondary" onclick="closeModal()">
-                        <span></span> Annulla
+                        Annulla
                     </button>
                     <button type="submit" class="btn btn-success">
-                        <span></span> Salva Bot
+                        Salva Bot
                     </button>
                 </div>
             </form>
@@ -1164,10 +1154,12 @@
             document.getElementById('botForm').reset();
             document.getElementById('enabled').checked = false; // Ensure new bots start disabled
             document.getElementById('botModal').style.display = 'block';
+            document.body.classList.add('modal-open'); // Lock body scroll
         }
 
         function closeModal() {
             document.getElementById('botModal').style.display = 'none';
+            document.body.classList.remove('modal-open'); // Unlock body scroll
             currentEditingBot = null;
         }
 
@@ -1183,6 +1175,7 @@
                 document.getElementById('hashtags').value = bot.bot.hashtags.join('\n');
                 document.getElementById('enabled').checked = false; // Always stop after edit
                 document.getElementById('botModal').style.display = 'block';
+                document.body.classList.add('modal-open'); // Lock body scroll
             } catch (error) {
                 alert('Errore nel caricamento dei dettagli del bot');
             }
