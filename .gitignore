@@ -68,6 +68,10 @@ screenshots/
 # Facebook cookies and session files
 fb_cookies.pkl
 
+# Instagram session files and rate limiting
+session_*.json
+rate_limits.json
+
 # Generated files
 facebook-posts.json
 state.json 
