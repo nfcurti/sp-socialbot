@@ -39,36 +39,48 @@ def get_proxies():
     return proxies
 
 def get_user_agents():
-    """Rotate user agents for better stealth"""
+    """Rotate user agents for better stealth - Updated to latest 2024/2025 versions"""
     user_agents = [
-        "Instagram 219.0.0.12.117 Android",
-        "Instagram 218.0.0.26.144 Android", 
-        "Instagram 217.0.0.15.119 Android",
-        "Instagram 216.0.0.26.147 Android",
-        "Instagram 215.0.0.16.119 Android"
+        "Instagram 387.1.0.34.85 Android",
+        "Instagram 385.0.0.47.74 Android", 
+        "Instagram 384.0.0.46.83 Android",
+        "Instagram 383.1.0.48.78 Android",
+        "Instagram 382.0.0.49.84 Android"
     ]
     return random.choice(user_agents)
 
 def get_device_settings():
-    """Generate random device settings for better stealth"""
+    """Generate random device settings for better stealth - Updated to current devices"""
     devices = [
         {
             "manufacturer": "samsung",
-            "model": "SM-G973F",
-            "android_version": 29,
-            "android_release": "10"
+            "model": "SM-S918B",  # Galaxy S23 Ultra
+            "android_version": 34,
+            "android_release": "14"
         },
         {
             "manufacturer": "xiaomi", 
-            "model": "Mi 9T Pro",
-            "android_version": 28,
-            "android_release": "9"
+            "model": "2312DRA50G",  # Redmi Note 13 Pro 5G
+            "android_version": 34,
+            "android_release": "14"
         },
         {
-            "manufacturer": "huawei",
-            "model": "ELE-L29",
-            "android_version": 28,
-            "android_release": "9"
+            "manufacturer": "realme",
+            "model": "RMX3842",  # Realme device
+            "android_version": 35,
+            "android_release": "15"
+        },
+        {
+            "manufacturer": "oppo",
+            "model": "CPH2665",
+            "android_version": 35,
+            "android_release": "15"
+        },
+        {
+            "manufacturer": "vivo",
+            "model": "V2420",
+            "android_version": 34,
+            "android_release": "14"
         }
     ]
     return random.choice(devices)
