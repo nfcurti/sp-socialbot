@@ -140,8 +140,8 @@ app.get('/bots/:botId', (req, res) => {
 });
 
 app.post('/execute', (req, res) => {
-    console.log('🎯 Manual execution triggered');
-    actions.addLog('manual_execution', true, 'Manual script execution triggered');
+    console.log('🎯 MANUAL EXECUTION VIA API - Random bot execution triggered');
+    actions.addLog('manual_execution', true, 'Manual script execution triggered via API endpoint');
     actions.executeRandomScript();
     
     res.json({
@@ -170,8 +170,8 @@ app.post('/execute/:botId', (req, res) => {
         });
     }
     
-    console.log(`🎯 Manual execution triggered for bot: ${bot.name}`);
-    actions.addLog('manual_execution', true, `Manual execution for bot: ${bot.name}`, bot.id);
+    console.log(`🎯 MANUAL EXECUTION VIA API - Specific bot execution triggered for: ${bot.name}`);
+    actions.addLog('manual_execution', true, `Manual execution via API for bot: ${bot.name}`, bot.id);
     
     const scripts = ['openai-instagram.py', 'openai-comments.py'];
     const randomScript = scripts[Math.floor(Math.random() * scripts.length)];
@@ -183,10 +183,10 @@ app.post('/execute/:botId', (req, res) => {
     exec(command, { timeout: 300000 }, (error, stdout, stderr) => {
         if (error) {
             console.error(`❌ Error executing ${randomScript}:`, error.message);
-            actions.addLog(`execute_${randomScript}`, false, `Bot: ${bot.name}, Hashtag: #${randomHashtag}, Error: ${error.message}`, bot.id);
+            actions.addLog(`manual_api_execute_${randomScript}`, false, `Manual API Execution - Bot: ${bot.name}, Hashtag: #${randomHashtag}, Error: ${error.message}`, bot.id);
         } else {
-            console.log(`✅ ${randomScript} executed successfully for bot: ${bot.name}`);
-            actions.addLog(`execute_${randomScript}`, true, `Bot: ${bot.name}, Hashtag: #${randomHashtag}, Output: ${stdout}`, bot.id);
+            console.log(`✅ ${randomScript} executed successfully for manual API execution - bot: ${bot.name}`);
+            actions.addLog(`manual_api_execute_${randomScript}`, true, `Manual API Execution - Bot: ${bot.name}, Hashtag: #${randomHashtag}, Output: ${stdout}`, bot.id);
         }
     });
     

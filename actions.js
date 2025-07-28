@@ -114,7 +114,7 @@ function executeRandomScript() {
         const randomScript = scripts[Math.floor(Math.random() * scripts.length)];
         const randomHashtag = getRandomHashtag(bot);
         
-        console.log('Attempting to execute script for bot:', bot);
+        console.log('🔄 SCHEDULER EXECUTION - Attempting to execute script for bot:', bot);
         console.log(`Selected script: ${randomScript}`);
         console.log(`Selected hashtag: #${randomHashtag}`);
         
@@ -153,38 +153,30 @@ function executeScriptForBot(bot) {
         const scripts = ['openai-instagram.py', 'openai-comments.py'];
         const randomScript = scripts[Math.floor(Math.random() * scripts.length)];
         const randomHashtag = getRandomHashtag(bot);
-
-        console.log('Attempting to execute script for bot:', bot);
+        
+        console.log('▶️ MANUAL BOT START - Attempting to execute script for bot:', bot);
         console.log(`Selected script: ${randomScript}`);
         console.log(`Selected hashtag: #${randomHashtag}`);
-
+        
         const scriptPath = path.join(__dirname, randomScript);
         const command = `${process.env.PYTHON_BIN || 'python3.11'} "${scriptPath}" "${bot.credentials.username}" "${bot.credentials.password}" "${randomHashtag}"`;
         console.log('Executing command:', command);
-
+        
         const config = loadConfig();
-
+        
         exec(command, { timeout: config.scheduler.scriptTimeout }, (error, stdout, stderr) => {
-            console.log('Script stdout:', stdout);
-            console.log('Script stderr:', stderr);
             if (error) {
                 console.error(`❌ Error executing ${randomScript}:`, error.message);
-                addLog(`execute_${randomScript}`, false, `Bot: ${bot.name}, Hashtag: #${randomHashtag}, Error: ${error.message}`, bot.id);
+                addLog(`manual_execute_${randomScript}`, false, `Manual Bot Start - Bot: ${bot.name}, Hashtag: #${randomHashtag}, Error: ${error.message}`, bot.id);
                 return;
             }
-
-            if (stderr) {
-                console.warn(`⚠️  ${randomScript} stderr:`, stderr);
-            }
-
-            console.log(`✅ ${randomScript} executed successfully`);
-            console.log(`📝 Output: ${stdout}`);
-
-            addLog(`execute_${randomScript}`, true, `Bot: ${bot.name}, Hashtag: #${randomHashtag}, Output: ${stdout}`, bot.id);
+            
+            console.log(`✅ ${randomScript} executed successfully for manual bot start`);
+            addLog(`manual_execute_${randomScript}`, true, `Manual Bot Start - Bot: ${bot.name}, Hashtag: #${randomHashtag}, Output: ${stdout}`, bot.id);
         });
     } catch (error) {
         console.error('❌ Error in executeScriptForBot:', error.message);
-        addLog('execute_script_for_bot', false, `Error: ${error.message}`);
+        addLog('execute_script_for_bot', false, `Error: ${error.message}`, bot.id);
     }
 }
 
