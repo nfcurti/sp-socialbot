@@ -824,11 +824,94 @@
                 grid-template-columns: 1fr;
             }
         }
+        /* Scheduler Status Styles */
+        .scheduler-status-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .scheduler-status-card {
+            background: var(--primary-light);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 2px 8px rgba(60,80,120,0.04);
+        }
+        
+        .status-info {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .status-indicator-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .status-indicator {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: inline-block;
+            transition: background-color 0.3s ease;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        
+        .status-indicator.status-running {
+            background: var(--success);
+            animation: pulse-green 2s infinite;
+        }
+        
+        .status-indicator.status-stopped {
+            background: var(--danger);
+        }
+        
+        @keyframes pulse-green {
+            0% { box-shadow: 0 0 0 0 rgba(39, 174, 96, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(39, 174, 96, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(39, 174, 96, 0); }
+        }
+        
+        .status-text {
+            font-size: 1.1em;
+            font-weight: 500;
+            color: var(--primary);
+            line-height: 1.4;
+        }
+        
+        .status-text small {
+            color: var(--gray);
+            font-size: 0.85em;
+            font-weight: normal;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="content">
+            <!-- Scheduler Status Section -->
+            <div class="section">
+                <div class="scheduler-status-header">
+                    <h2>Stato Scheduler</h2>
+                    <button id="toggleSchedulerBtn" class="btn btn-success" onclick="toggleScheduler()">Start Scheduler</button>
+                </div>
+                <div class="scheduler-status-card">
+                    <div class="status-info">
+                        <div class="status-indicator-container">
+                            <div id="statusIndicator" class="status-indicator status-stopped"></div>
+                            <div id="statusText" class="status-text">
+                                Scheduler is stopped<br>
+                                <small>Caricamento stato...</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
             <div class="section">
                 <div class="bots-header">
                     <h2>Istanze Bot</h2>
@@ -991,12 +1074,18 @@
 
                 if (status.schedulerRunning) {
                     indicator.className = 'status-indicator status-running';
-                    statusText.textContent = 'Scheduler is running';
+                    statusText.innerHTML = `
+                        Scheduler is running<br>
+                        <small>Executions: ${status.executionCount || 0} | Uptime: ${Math.floor(status.uptime / 60)}m | Last check: ${status.lastCheck}</small>
+                    `;
                     toggleBtn.textContent = 'Stop Scheduler';
                     toggleBtn.className = 'btn btn-danger';
                 } else {
                     indicator.className = 'status-indicator status-stopped';
-                    statusText.textContent = 'Scheduler is stopped';
+                    statusText.innerHTML = `
+                        Scheduler is stopped<br>
+                        <small>Total executions: ${status.executionCount || 0} | Last check: ${status.lastCheck}</small>
+                    `;
                     toggleBtn.textContent = 'Start Scheduler';
                     toggleBtn.className = 'btn btn-success';
                 }
@@ -1412,11 +1501,32 @@
             alert('Funzionalità di modifica in arrivo!');
         }
 
+        async function toggleScheduler() {
+            try {
+                const status = await fetchAPI('/status');
+                const endpoint = status.schedulerRunning ? '/stop' : '/start';
+                const response = await fetch(`${API_BASE}${endpoint}`, { method: 'POST' });
+                const data = await response.json();
+                
+                if (data.success) {
+                    const action = status.schedulerRunning ? 'fermato' : 'avviato';
+                    console.log(`Scheduler ${action} con successo!`);
+                    await updateStatus();
+                } else {
+                    alert('Errore nel cambio dello stato del Scheduler: ' + (data.message || 'Sconosciuto'));
+                }
+            } catch (error) {
+                console.error('Error toggling scheduler:', error);
+                alert('Errore nel cambio dello stato del Scheduler: ' + error.message);
+            }
+        }
+
         async function refreshData() {
             await Promise.all([
                 updateBots(),
                 updateLogs(),
-                updateScheduledPosts()
+                updateScheduledPosts(),
+                updateStatus() // Refresh status after each update
             ]);
         }
 
@@ -1446,4 +1556,4 @@
         });
     </script>
 </body>
-</html> 
+</html>

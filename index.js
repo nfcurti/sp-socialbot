@@ -53,11 +53,16 @@ function saveFacebookPosts(data) {
 app.get('/status', (req, res) => {
     const isRunning = scheduler.isRunning();
     const status = actions.getSchedulerStatus();
+    const detailedStatus = scheduler.getStatus();
     
     res.json({
         schedulerRunning: isRunning,
         status: isRunning ? 'running' : 'stopped',
-        timestamp: new Date().toISOString()
+        executionCount: detailedStatus.executionCount,
+        startTime: detailedStatus.startTime,
+        timestamp: new Date().toISOString(),
+        uptime: process.uptime(),
+        lastCheck: new Date().toLocaleTimeString()
     });
 });
 
