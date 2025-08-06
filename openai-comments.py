@@ -131,8 +131,8 @@ def check_rate_limits():
     limits["comments"] = [t for t in limits["comments"] if t > hour_ago]
     
     # Check limits (more conservative for comments)
-    if len(limits["comments"]) >= 20:  # Max 20 comments per hour
-        print("⚠️ Rate limit reached for comments (20/hour)")
+    if len(limits["comments"]) >= 15:  # Reduced from 20 to 15 comments per hour
+        print("⚠️ Rate limit reached for comments (15/hour)")
         return False
     
     return True
@@ -215,42 +215,79 @@ if not login_success:
 
 def generate_comment_with_chatgpt(post_content, hashtag):
     try:
-        prompt = f"""
-You are the social media manager for a restaurant. Generate a short, engaging comment (max 140 characters) for this Instagram post.
+        # More human-like prompt with natural variations
+        prompts = [
+            f"""You are a real person commenting on Instagram. Write a natural, casual comment for this food post.
 
-Post content: {post_content}
+Post: {post_content}
 Hashtag: #{hashtag}
 
-Requirements:
-- Act as a restaurant's social media manager
-- Be friendly and professional
-- Show appreciation for food/cooking content
-- Reference the hashtag naturally
-- Keep it under 140 characters, be succint
-- Add 1-2 relevant emojis ONLY if you find it necessary
-- Sound natural and human-like
-- Don't be overly promotional
-- Focus on food appreciation and community engagement
-- Avoid naming the restaurant in the comment
-- In Italian
+Write like a real person would comment - casual, friendly, maybe with a small typo or informal language. Keep it under 120 characters. Don't be overly enthusiastic or promotional. Just be natural.
+
+Comment:""",
+            
+            f"""Comment on this Instagram food post as a regular person:
+
+Post: {post_content}
+Hashtag: #{hashtag}
+
+Write a casual, human comment. Maybe mention something specific about the food, or just say you like it. Keep it short and natural. No excessive emojis.
+
+Comment:""",
+            
+            f"""You're commenting on a food Instagram post. Be natural and casual:
+
+Post: {post_content}
+Hashtag: #{hashtag}
+
+Write like you're talking to a friend. Maybe ask a question or just say you like it. Keep it conversational and under 120 characters.
 
 Comment:"""
-
+        ]
+        
+        prompt = random.choice(prompts)
+        
         response = client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=[
-                {"role": "system", "content": "You are the social media manager for a restaurant who engages with food and cooking content in a friendly, professional manner."},
+                {"role": "system", "content": "You are a real person commenting on Instagram food posts. Write natural, casual comments like a human would. Don't be overly enthusiastic or promotional."},
                 {"role": "user", "content": prompt}
             ],
-            max_tokens=100,
-            temperature=0.7
+            max_tokens=80,
+            temperature=0.8  # Higher temperature for more variation
         )
         
         comment = response.choices[0].message.content.strip()
+        
+        # Sometimes add small human touches
+        if random.random() < 0.3:  # 30% chance
+            human_touches = [
+                lambda x: x.replace("!", "! "),
+                lambda x: x + " 😊" if "😊" not in x else x,
+                lambda x: x.replace("amazing", "nice"),
+                lambda x: x.replace("delicious", "good"),
+                lambda x: x + " looks good",
+                lambda x: x.replace("love", "like"),
+            ]
+            comment = random.choice(human_touches)(comment)
+        
         return comment
     except Exception as e:
         print(f"⚠️  ChatGPT API error: {e}")
-        return f"Love this #{hashtag} content! 🍽️"
+        # More natural fallback comments
+        fallbacks = [
+            f"nice #{hashtag}",
+            f"looks good",
+            f"yum",
+            f"delicious",
+            f"love this",
+            f"looks tasty",
+            f"yummy",
+            f"nice post",
+            f"looks great",
+            f"good stuff"
+        ]
+        return random.choice(fallbacks)
 
 # Require hashtag for comments
 if not hashtag:
@@ -310,7 +347,12 @@ if not posts_to_comment:
 print(f"Found {len(posts_to_comment)} posts you haven't commented on")
 
 # Limit to max 2 comments for safety (more conservative than likes)
-num_to_comment = min(2, len(posts_to_comment))
+# Reduce by 20% - now 1-2 comments with 20% chance to skip entirely
+if random.random() < 0.2:  # 20% chance to skip commenting entirely
+    print("🎲 Randomly skipping comment generation (20% reduction)")
+    sys.exit(0)
+
+num_to_comment = min(random.randint(1, 2), len(posts_to_comment))  # 1-2 comments instead of always 2
 selected_medias = random.sample(posts_to_comment, num_to_comment)
 
 success_count = 0
@@ -326,8 +368,26 @@ for i, media in enumerate(selected_medias, 1):
         
         comment = generate_comment_with_chatgpt(post_content, hashtag)
         
-        # Additional delay before posting comment
-        safe_delay(3, 8)
+        # Sometimes add human-like typos or casual language
+        if random.random() < 0.15:  # 15% chance for human touches
+            human_modifications = [
+                lambda x: x.replace("looks", "looks like"),
+                lambda x: x.replace("amazing", "amaz"),
+                lambda x: x.replace("delicious", "delish"),
+                lambda x: x + " tbh",
+                lambda x: x.replace("!", "!!"),
+                lambda x: x.replace("love", "luv"),
+                lambda x: x.replace("really", "rly"),
+                lambda x: x.replace("you", "u"),
+                lambda x: x.replace("are", "r"),
+                lambda x: x + " tho",
+                lambda x: x.replace("good", "gd"),
+                lambda x: x.replace("great", "gr8"),
+            ]
+            comment = random.choice(human_modifications)(comment)
+        
+        # Additional delay before posting comment (more human-like)
+        safe_delay(5, 12)  # Slightly longer delay to seem more human
         
         cl.media_comment(media.id, comment)
         print(f"💬 Commented on post {i}: https://www.instagram.com/p/{media.code}/")
@@ -339,8 +399,8 @@ for i, media in enumerate(selected_medias, 1):
         update_rate_limits("comments")
         success_count += 1
         
-        # Additional delay after successful comment
-        safe_delay(5, 15)
+        # Additional delay after successful comment (more human-like)
+        safe_delay(8, 18)  # Longer delay to seem more natural
         
     except Exception as e:
         print(f"⚠️ Failed to comment on post {i}: {e}")
