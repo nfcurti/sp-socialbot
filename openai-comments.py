@@ -215,79 +215,165 @@ if not login_success:
 
 def generate_comment_with_chatgpt(post_content, hashtag):
     try:
-        # More human-like prompt with natural variations
-        prompts = [
-            f"""You are a real person commenting on Instagram. Write a natural, casual comment for this food post.
+        # Analyze post content to generate more contextual comments
+        content_analysis = analyze_post_content(post_content)
+        
+        # More sophisticated prompt system based on content type
+        if content_analysis['type'] == 'food':
+            prompts = [
+                f"""You're a real person who loves food. Comment on this food post naturally:
 
 Post: {post_content}
 Hashtag: #{hashtag}
+Food type: {content_analysis.get('food_type', 'general')}
 
-Write like a real person would comment - casual, friendly, maybe with a small typo or informal language. Keep it under 120 characters. Don't be overly enthusiastic or promotional. Just be natural.
+Write like you're genuinely interested in the food. Maybe ask about the recipe, mention you want to try it, or just say it looks good. Be specific about what you see. Keep it under 100 characters and sound natural.
 
 Comment:""",
-            
-            f"""Comment on this Instagram food post as a regular person:
+                
+                f"""Comment on this food post as someone who appreciates good food:
 
 Post: {post_content}
 Hashtag: #{hashtag}
 
-Write a casual, human comment. Maybe mention something specific about the food, or just say you like it. Keep it short and natural. No excessive emojis.
-
-Comment:""",
-            
-            f"""You're commenting on a food Instagram post. Be natural and casual:
-
-Post: {post_content}
-Hashtag: #{hashtag}
-
-Write like you're talking to a friend. Maybe ask a question or just say you like it. Keep it conversational and under 120 characters.
+Write a casual, specific comment about the food. Maybe mention a detail you noticed, ask a question, or just say it looks delicious. Sound like a real person, not a bot.
 
 Comment:"""
-        ]
+            ]
+        elif content_analysis['type'] == 'cooking':
+            prompts = [
+                f"""You're commenting on a cooking post. Be genuinely interested:
+
+Post: {post_content}
+Hashtag: #{hashtag}
+
+Write like you're impressed by the cooking skills or want to learn more. Ask about the technique, mention it looks professional, or just say it looks amazing. Be specific and natural.
+
+Comment:"""
+            ]
+        else:
+            prompts = [
+                f"""Comment on this Instagram post naturally:
+
+Post: {post_content}
+Hashtag: #{hashtag}
+
+Write like a real person would comment. Be specific about what you see, ask a question, or just say something nice. Keep it casual and under 100 characters.
+
+Comment:"""
+            ]
         
         prompt = random.choice(prompts)
         
         response = client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=[
-                {"role": "system", "content": "You are a real person commenting on Instagram food posts. Write natural, casual comments like a human would. Don't be overly enthusiastic or promotional."},
+                {"role": "system", "content": "You are a real person commenting on Instagram posts. Write natural, specific comments that reference the actual content. Don't be generic or promotional. Sound like a human who is genuinely interested in what they're seeing."},
                 {"role": "user", "content": prompt}
             ],
             max_tokens=80,
-            temperature=0.8  # Higher temperature for more variation
+            temperature=0.9  # Higher temperature for more natural variation
         )
         
         comment = response.choices[0].message.content.strip()
         
-        # Sometimes add small human touches
-        if random.random() < 0.3:  # 30% chance
-            human_touches = [
-                lambda x: x.replace("!", "! "),
-                lambda x: x + " 😊" if "😊" not in x else x,
-                lambda x: x.replace("amazing", "nice"),
-                lambda x: x.replace("delicious", "good"),
-                lambda x: x + " looks good",
-                lambda x: x.replace("love", "like"),
+        # Add human-like variations and typos occasionally
+        if random.random() < 0.25:  # 25% chance for human touches
+            human_modifications = [
+                lambda x: x.replace("looks", "looks like"),
+                lambda x: x.replace("amazing", "amaz"),
+                lambda x: x.replace("delicious", "delish"),
+                lambda x: x + " tbh",
+                lambda x: x.replace("!", "!!"),
+                lambda x: x.replace("love", "luv"),
+                lambda x: x.replace("really", "rly"),
+                lambda x: x.replace("you", "u"),
+                lambda x: x.replace("are", "r"),
+                lambda x: x + " tho",
+                lambda x: x.replace("good", "gd"),
+                lambda x: x.replace("great", "gr8"),
+                lambda x: x.replace("that", "dat"),
+                lambda x: x.replace("with", "w/"),
+                lambda x: x.replace("about", "abt"),
             ]
-            comment = random.choice(human_touches)(comment)
+            comment = random.choice(human_modifications)(comment)
+        
+        # Sometimes add emojis naturally (not excessive)
+        if random.random() < 0.3 and len(comment) < 80:
+            natural_emojis = ["😋", "👌", "🔥", "💯", "😍", "🤤"]
+            if not any(emoji in comment for emoji in natural_emojis):
+                comment += f" {random.choice(natural_emojis)}"
         
         return comment
     except Exception as e:
         print(f"⚠️  ChatGPT API error: {e}")
         # More natural fallback comments
         fallbacks = [
-            f"nice #{hashtag}",
             f"looks good",
             f"yum",
             f"delicious",
-            f"love this",
-            f"looks tasty",
-            f"yummy",
             f"nice post",
             f"looks great",
-            f"good stuff"
+            f"good stuff",
+            f"looks tasty",
+            f"yummy",
+            f"looks amazing",
+            f"love this"
         ]
         return random.choice(fallbacks)
+
+def analyze_post_content(content):
+    """Analyze post content to generate more contextual comments"""
+    content_lower = content.lower()
+    
+    # Food-related keywords
+    food_keywords = ['pizza', 'pasta', 'burger', 'sushi', 'cake', 'bread', 'cheese', 'meat', 'fish', 'chicken', 'beef', 'pork', 'salad', 'soup', 'dessert', 'ice cream', 'chocolate', 'coffee', 'tea', 'wine', 'beer', 'cocktail']
+    
+    # Cooking-related keywords
+    cooking_keywords = ['recipe', 'cook', 'bake', 'grill', 'fry', 'roast', 'steam', 'sauté', 'homemade', 'kitchen', 'chef', 'cooking', 'baking', 'prep', 'ingredients', 'method', 'technique']
+    
+    # Avoid commenting on posts with these keywords (inappropriate or spam)
+    avoid_keywords = ['buy now', 'click link', 'dm me', 'message me', 'follow me', 'like for like', 'follow for follow', 'sponsored', 'ad', 'promotion', 'sale', 'discount', 'limited time', 'offer']
+    
+    # Check for inappropriate content
+    for keyword in avoid_keywords:
+        if keyword in content_lower:
+            return {'type': 'avoid', 'reason': f'Contains {keyword}', 'confidence': 0}
+    
+    # Determine content type
+    food_matches = sum(1 for keyword in food_keywords if keyword in content_lower)
+    cooking_matches = sum(1 for keyword in cooking_keywords if keyword in content_lower)
+    
+    if cooking_matches > 0:
+        return {'type': 'cooking', 'confidence': cooking_matches}
+    elif food_matches > 0:
+        return {'type': 'food', 'food_type': 'general', 'confidence': food_matches}
+    else:
+        return {'type': 'general', 'confidence': 0}
+
+def is_safe_to_comment(media):
+    """Check if it's safe to comment on this post"""
+    try:
+        caption = media.caption_text or ""
+        
+        # Skip posts that are too old (more than 7 days)
+        # Skip posts with very short captions (likely low quality)
+        if len(caption) < 10:
+            return False, "Caption too short"
+        
+        # Skip posts with excessive hashtags (spam-like)
+        hashtag_count = caption.count('#')
+        if hashtag_count > 20:
+            return False, "Too many hashtags"
+        
+        # Skip posts with excessive mentions
+        mention_count = caption.count('@')
+        if mention_count > 5:
+            return False, "Too many mentions"
+        
+        return True, "Safe to comment"
+    except:
+        return False, "Error analyzing post"
 
 # Require hashtag for comments
 if not hashtag:
@@ -352,19 +438,66 @@ if random.random() < 0.2:  # 20% chance to skip commenting entirely
     print("🎲 Randomly skipping comment generation (20% reduction)")
     sys.exit(0)
 
-num_to_comment = min(random.randint(1, 2), len(posts_to_comment))  # 1-2 comments instead of always 2
-selected_medias = random.sample(posts_to_comment, num_to_comment)
+# More sophisticated selection based on content quality
+high_quality_posts = []
+for media in posts_to_comment:
+    try:
+        # Analyze post quality
+        caption_length = len(media.caption_text or "")
+        has_hashtags = '#' in (media.caption_text or "")
+        has_mentions = '@' in (media.caption_text or "")
+        
+        # Prefer posts with longer captions and hashtags (more engagement)
+        quality_score = 0
+        if caption_length > 50:
+            quality_score += 2
+        if has_hashtags:
+            quality_score += 1
+        if has_mentions:
+            quality_score += 1
+        
+        if quality_score >= 2:
+            high_quality_posts.append(media)
+    except:
+        pass
+
+# Use high quality posts if available, otherwise use all posts
+posts_to_use = high_quality_posts if high_quality_posts else posts_to_comment
+num_to_comment = min(random.randint(1, 2), len(posts_to_use))  # 1-2 comments instead of always 2
+selected_medias = random.sample(posts_to_use, num_to_comment)
 
 success_count = 0
 for i, media in enumerate(selected_medias, 1):
     try:
-        safe_delay(10, 20)  # Longer delay between comments (10-20 seconds)
+        # More sophisticated timing - vary delays based on post type
+        base_delay = random.uniform(15, 30)  # Longer base delay
+        
+        # Add extra delay for posts with more engagement (more human-like)
+        caption_length = len(media.caption_text or "")
+        if caption_length > 100:
+            base_delay += random.uniform(5, 15)  # Extra time to "read" longer posts
+        
+        safe_delay(base_delay, base_delay + 10)
         
         post_content = ""
         if media.caption_text:
             post_content = media.caption_text
         else:
             post_content = f"Post about #{hashtag}"
+        
+        # Analyze content for better comment generation
+        content_analysis = analyze_post_content(post_content)
+        
+        # Skip posts that are not safe to comment on
+        is_safe, reason = is_safe_to_comment(media)
+        if not is_safe:
+            print(f"⚠️ Skipping post {i}: {reason}")
+            continue
+        
+        # Skip posts with inappropriate content
+        if content_analysis['type'] == 'avoid':
+            print(f"⚠️ Skipping post {i}: {content_analysis['reason']}")
+            continue
         
         comment = generate_comment_with_chatgpt(post_content, hashtag)
         
@@ -383,15 +516,22 @@ for i, media in enumerate(selected_medias, 1):
                 lambda x: x + " tho",
                 lambda x: x.replace("good", "gd"),
                 lambda x: x.replace("great", "gr8"),
+                lambda x: x.replace("that", "dat"),
+                lambda x: x.replace("with", "w/"),
+                lambda x: x.replace("about", "abt"),
+                lambda x: x.replace("because", "bc"),
+                lambda x: x.replace("through", "thru"),
             ]
             comment = random.choice(human_modifications)(comment)
         
         # Additional delay before posting comment (more human-like)
-        safe_delay(5, 12)  # Slightly longer delay to seem more human
+        pre_comment_delay = random.uniform(8, 20)  # Longer delay to seem more thoughtful
+        safe_delay(pre_comment_delay, pre_comment_delay + 5)
         
         cl.media_comment(media.id, comment)
         print(f"💬 Commented on post {i}: https://www.instagram.com/p/{media.code}/")
         print(f"   Post content: {post_content[:100]}{'...' if len(post_content) > 100 else ''}")
+        print(f"   Content type: {content_analysis['type']}")
         print(f"   AI Comment: {comment}")
         print("-" * 50)
         
@@ -400,11 +540,12 @@ for i, media in enumerate(selected_medias, 1):
         success_count += 1
         
         # Additional delay after successful comment (more human-like)
-        safe_delay(8, 18)  # Longer delay to seem more natural
+        post_comment_delay = random.uniform(12, 25)  # Longer delay to seem more natural
+        safe_delay(post_comment_delay, post_comment_delay + 8)
         
     except Exception as e:
         print(f"⚠️ Failed to comment on post {i}: {e}")
-        safe_delay(15, 30)  # Much longer delay on comment error
+        safe_delay(20, 40)  # Much longer delay on comment error
 
 print(f"✅ Successfully commented on {success_count}/{len(selected_medias)} posts")
 
