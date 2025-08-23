@@ -221,44 +221,44 @@ def generate_comment_with_chatgpt(post_content, hashtag):
         # More sophisticated prompt system based on content type
         if content_analysis['type'] == 'food':
             prompts = [
-                f"""You're a real person who loves food. Comment on this food post naturally:
+                f"""You're a real person who loves food. Comment on this food post naturally in Italian:
 
 Post: {post_content}
 Hashtag: #{hashtag}
 Food type: {content_analysis.get('food_type', 'general')}
 
-Write like you're genuinely interested in the food. Maybe ask about the recipe, mention you want to try it, or just say it looks good. Be specific about what you see. Keep it under 100 characters and sound natural.
+Write like you're genuinely interested in the food. Maybe ask about the recipe, mention you want to try it, or just say it looks good. Be specific about what you see. Keep it under 100 characters and sound natural. IMPORTANT: Write the comment in Italian language only.
 
 Comment:""",
                 
-                f"""Comment on this food post as someone who appreciates good food:
+                f"""Comment on this food post as someone who appreciates good food in Italian:
 
 Post: {post_content}
 Hashtag: #{hashtag}
 
-Write a casual, specific comment about the food. Maybe mention a detail you noticed, ask a question, or just say it looks delicious. Sound like a real person, not a bot.
+Write a casual, specific comment about the food. Maybe mention a detail you noticed, ask a question, or just say it looks delicious. Sound like a real person, not a bot. IMPORTANT: Write the comment in Italian language only.
 
 Comment:"""
             ]
         elif content_analysis['type'] == 'cooking':
             prompts = [
-                f"""You're commenting on a cooking post. Be genuinely interested:
+                f"""You're commenting on a cooking post. Be genuinely interested in Italian:
 
 Post: {post_content}
 Hashtag: #{hashtag}
 
-Write like you're impressed by the cooking skills or want to learn more. Ask about the technique, mention it looks professional, or just say it looks amazing. Be specific and natural.
+Write like you're impressed by the cooking skills or want to learn more. Ask about the technique, mention it looks professional, or just say it looks amazing. Be specific and natural. IMPORTANT: Write the comment in Italian language only.
 
 Comment:"""
             ]
         else:
             prompts = [
-                f"""Comment on this Instagram post naturally:
+                f"""Comment on this Instagram post naturally in Italian:
 
 Post: {post_content}
 Hashtag: #{hashtag}
 
-Write like a real person would comment. Be specific about what you see, ask a question, or just say something nice. Keep it casual and under 100 characters.
+Write like a real person would comment. Be specific about what you see, ask a question, or just say something nice. Keep it casual and under 100 characters. IMPORTANT: Write the comment in Italian language only.
 
 Comment:"""
             ]
@@ -266,9 +266,9 @@ Comment:"""
         prompt = random.choice(prompts)
         
         response = client.chat.completions.create(
-            model="gpt-3.5-turbo",
+            model="gpt-5-mini",
             messages=[
-                {"role": "system", "content": "You are a real person commenting on Instagram posts. Write natural, specific comments that reference the actual content. Don't be generic or promotional. Sound like a human who is genuinely interested in what they're seeing."},
+                {"role": "system", "content": "You are a real person commenting on Instagram posts. Write natural, specific comments that reference the actual content. Don't be generic or promotional. Sound like a human who is genuinely interested in what they're seeing. IMPORTANT: All comments MUST be written in Italian language only."},
                 {"role": "user", "content": prompt}
             ],
             max_tokens=80,
@@ -307,18 +307,18 @@ Comment:"""
         return comment
     except Exception as e:
         print(f"⚠️  ChatGPT API error: {e}")
-        # More natural fallback comments
+        # More natural fallback comments in Italian
         fallbacks = [
-            f"looks good",
+            f"sembra buono",
             f"yum",
-            f"delicious",
-            f"nice post",
-            f"looks great",
-            f"good stuff",
-            f"looks tasty",
+            f"delizioso",
+            f"bel post",
+            f"sembra ottimo",
+            f"roba buona",
+            f"sembra gustoso",
             f"yummy",
-            f"looks amazing",
-            f"love this"
+            f"sembra fantastico",
+            f"mi piace questo"
         ]
         return random.choice(fallbacks)
 
