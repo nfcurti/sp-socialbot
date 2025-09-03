@@ -187,11 +187,21 @@ if session_file:
     try:
         cl.load_settings(session_file)
         cl.login(USERNAME, PASSWORD)
-        print("✅ Login successful with existing session!")
-        login_success = True
+        
+        # Test if session is actually valid by making a simple API call
+        try:
+            test_user = cl.user_info_by_username("instagram")
+            print("✅ Login successful with existing session!")
+            login_success = True
+        except Exception as test_error:
+            print(f"⚠️ Session appears expired: {test_error}")
+            print("🔄 Attempting fresh login...")
+            login_success = False
+            
     except Exception as e:
         print(f"⚠️ Session login failed: {e}")
         print("🔄 Attempting fresh login...")
+        login_success = False
 
 # If session login failed, try fresh login with proxies
 if not login_success:
@@ -221,44 +231,44 @@ def generate_comment_with_chatgpt(post_content, hashtag):
         # More sophisticated prompt system based on content type
         if content_analysis['type'] == 'food':
             prompts = [
-                f"""You're a real person who loves food. Comment on this food post naturally in Italian:
+                f"""You're a restaurant owner who loves food and wants to build genuine connections on social media. Comment on this food post naturally in Italian:
 
 Post: {post_content}
 Hashtag: #{hashtag}
 Food type: {content_analysis.get('food_type', 'general')}
 
-Write like you're genuinely interested in the food. Maybe ask about the recipe, mention you want to try it, or just say it looks good. Be specific about what you see. Keep it under 100 characters and sound natural. IMPORTANT: Write the comment in Italian language only.
+Write like you're genuinely interested in the food as a fellow food lover. Maybe ask about the recipe, mention you want to try it, or just say it looks good. Be specific about what you see. Keep it under 100 characters and sound natural. IMPORTANT: Write the comment in Italian language only. Don't mention your restaurant - just be a food enthusiast.
 
 Comment:""",
                 
-                f"""Comment on this food post as someone who appreciates good food in Italian:
+                f"""Comment on this food post as a restaurant owner who appreciates good food in Italian:
 
 Post: {post_content}
 Hashtag: #{hashtag}
 
-Write a casual, specific comment about the food. Maybe mention a detail you noticed, ask a question, or just say it looks delicious. Sound like a real person, not a bot. IMPORTANT: Write the comment in Italian language only.
+Write a casual, specific comment about the food. Maybe mention a detail you noticed, ask a question, or just say it looks delicious. Sound like a real person who knows food, not a bot. IMPORTANT: Write the comment in Italian language only. Don't promote anything - just show genuine food appreciation.
 
 Comment:"""
             ]
         elif content_analysis['type'] == 'cooking':
             prompts = [
-                f"""You're commenting on a cooking post. Be genuinely interested in Italian:
+                f"""You're a restaurant owner commenting on a cooking post. Be genuinely interested in Italian:
 
 Post: {post_content}
 Hashtag: #{hashtag}
 
-Write like you're impressed by the cooking skills or want to learn more. Ask about the technique, mention it looks professional, or just say it looks amazing. Be specific and natural. IMPORTANT: Write the comment in Italian language only.
+Write like you're impressed by the cooking skills or want to learn more. Ask about the technique, mention it looks professional, or just say it looks amazing. Be specific and natural. IMPORTANT: Write the comment in Italian language only. Show your passion for cooking without promoting your business.
 
 Comment:"""
             ]
         else:
             prompts = [
-                f"""Comment on this Instagram post naturally in Italian:
+                f"""Comment on this Instagram post naturally in Italian as a restaurant owner:
 
 Post: {post_content}
 Hashtag: #{hashtag}
 
-Write like a real person would comment. Be specific about what you see, ask a question, or just say something nice. Keep it casual and under 100 characters. IMPORTANT: Write the comment in Italian language only.
+Write like a real person would comment. Be specific about what you see, ask a question, or just say something nice. Keep it casual and under 100 characters. IMPORTANT: Write the comment in Italian language only. Don't be promotional - just be genuinely interested in the content.
 
 Comment:"""
             ]
@@ -266,9 +276,9 @@ Comment:"""
         prompt = random.choice(prompts)
         
         response = client.chat.completions.create(
-            model="gpt-5-mini",
+            model="gpt-4o-mini",
             messages=[
-                {"role": "system", "content": "You are a real person commenting on Instagram posts. Write natural, specific comments that reference the actual content. Don't be generic or promotional. Sound like a human who is genuinely interested in what they're seeing. IMPORTANT: All comments MUST be written in Italian language only."},
+                {"role": "system", "content": "You are a restaurant owner who wants to build genuine connections on social media. You comment on food and cooking posts to show your passion for food and engage with the community. Write natural, specific comments that reference the actual content. Don't be generic, promotional, or mention your restaurant. Sound like a human who genuinely loves food and cooking. IMPORTANT: All comments MUST be written in Italian language only."},
                 {"role": "user", "content": prompt}
             ],
             max_tokens=80,
@@ -391,8 +401,21 @@ for attempt in range(max_retries):
         medias = cl.hashtag_medias_recent(hashtag, amount=30)
         break
     except Exception as e:
+        error_msg = str(e).lower()
         print(f"Error fetching medias (attempt {attempt + 1}): {e}")
-        if attempt < max_retries - 1:
+        
+        # Handle specific Instagram errors
+        if "login_required" in error_msg:
+            print("❌ Instagram requires fresh login. Deleting session file...")
+            session_file = f"session_{USERNAME}.json"
+            if os.path.exists(session_file):
+                os.remove(session_file)
+                print("✅ Session file deleted. Please run the script again for fresh login.")
+            sys.exit(1)
+        elif "rate" in error_msg or "limit" in error_msg:
+            print("⚠️ Rate limit detected. Waiting longer...")
+            safe_delay(30, 60)  # Much longer delay for rate limits
+        elif attempt < max_retries - 1:
             safe_delay(10, 20)  # Longer delay on error
         else:
             medias = []
